@@ -1,6 +1,6 @@
-import {
+const {
   ERROR_CODE, ERROR_NOT_FOUND, STATUS_OK, ERROR_SERVER,
-} from '../utils/constants';
+} = require('../utils/constants');
 
 const User = require('../models/user');
 
