@@ -27,11 +27,15 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.id)
     .then((card) => {
+      if (!card) {
+        res.status(ERROR_NOT_FOUND).send({ message: 'Такой карточки нет' });
+        return;
+      }
       res.status(STATUS_OK).send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_NOT_FOUND).send({ message: 'Такой карточки нет' });
+        res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные' });
         return;
       }
       res.status(ERROR_SERVER).send({ message: 'Внутренняя ошибка сервера' });
@@ -44,6 +48,10 @@ module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
   { new: true },
 )
   .then((card) => {
+    if (!card) {
+      res.status(ERROR_NOT_FOUND).send({ message: 'Такой карточки нет' });
+      return;
+    }
     res.status(STATUS_OK).send({ data: card });
   })
   .catch((err) => {
@@ -60,6 +68,10 @@ module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
   { new: true },
 )
   .then((card) => {
+    if (!card) {
+      res.status(ERROR_NOT_FOUND).send({ message: 'Такой карточки нет' });
+      return;
+    }
     res.status(STATUS_OK).send({ data: card });
   })
   .catch((err) => {

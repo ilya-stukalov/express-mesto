@@ -25,12 +25,15 @@ module.exports.createUser = (req, res) => {
 
 module.exports.getUsersById = (req, res) => {
   User.findById(req.params.id)
-    .then((users) => {
-      res.status(STATUS_OK).send(users);
+    .then((user) => {
+      if (!user) {
+        return res.status(ERROR_NOT_FOUND).send({ message: 'Такого пользователя нет' });
+      }
+      return res.status(STATUS_OK).send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(ERROR_NOT_FOUND).send({ message: 'Такого пользователя нет' });
+        res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные' });
         return;
       }
       res.status(ERROR_SERVER).send({ message: `Внутренняя ошибка сервера: ${err}` });
@@ -47,7 +50,7 @@ module.exports.updateUserInfo = (req, res) => {
       return res.status(STATUS_OK).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные' });
         return;
       }
@@ -64,7 +67,7 @@ module.exports.updateUserAvatar = (req, res) => {
       return res.status(STATUS_OK).send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         res.status(ERROR_CODE).send({ message: 'Переданы некорректные данные' });
         return;
       }

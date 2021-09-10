@@ -5,3 +5,5 @@ module.exports.ERROR_NOT_FOUND = 404;
 module.exports.STATUS_OK = 200;
 
 module.exports.ERROR_SERVER = 500;
+
+module.exports.dbOptions = {};
