@@ -1,9 +1,3 @@
-module.exports.ERROR_CODE = 400;
-
-module.exports.ERROR_NOT_FOUND = 404;
+module.exports.dbOptions = {};
 
 module.exports.STATUS_OK = 200;
-
-module.exports.ERROR_SERVER = 500;
-
-module.exports.dbOptions = {};
