@@ -24,10 +24,12 @@ router.patch('/users/me',
       .keys({
         name: Joi.string()
           .min(2)
-          .max(30),
+          .max(30)
+          .required(),
         about: Joi.string()
           .min(2)
-          .max(30),
+          .max(30)
+          .required(),
       }),
   }), updateUserInfo);
 
@@ -46,7 +48,8 @@ router.get('/users/:id',
     params: Joi.object()
       .keys({
         id: Joi.string()
-          .length(24),
+          .length(24)
+          .hex(),
       }),
   }), getUsersById);
 

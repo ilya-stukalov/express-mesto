@@ -33,11 +33,12 @@ module.exports.createCard = (req, res, next) => {
       .status(STATUS_OK)
       .send({ data: card }))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new InvalidData(err.message);
+      if (err.name !== 'ValidationError') {
+        next(new InvalidData(err.message));
+      } else {
+        next(err);
       }
-    })
-    .catch((err) => next(err));
+    });
 };
 
 module.exports.deleteCard = (req, res, next) => {

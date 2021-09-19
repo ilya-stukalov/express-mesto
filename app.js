@@ -9,17 +9,17 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // за 15 минут
-  max: 1000, // можно совершить максимум 100 запросов с одного IP
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
 });
 
 app.use(limiter);
 
-const mongoose = require('mongoose');
+const helmet = require('helmet');
 
-const {
-  dbOptions,
-} = require('./utils/constants');
+app.use(helmet());
+
+const mongoose = require('mongoose');
 
 const { PORT = 3000 } = process.env;
 
@@ -50,7 +50,7 @@ app.post('/signup',
       about: Joi.string().min(2).max(30),
       email: Joi.string().required().email(),
       password: Joi.string().required().min(8),
-      avatar: Joi.string().required().regex(/^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*$/),
+      avatar: Joi.string().regex(/^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*$/),
     }),
   }),
   createUser);
@@ -71,7 +71,7 @@ app.use('/', require('./routes/cards'));
 
 app.use('*', require('./routes/otherRoutes'));
 
-mongoose.connect('mongodb://localhost:27017/mestodb', dbOptions);
+mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use(errors());
 
@@ -80,22 +80,14 @@ app.use((err, req, res, next) => {
     statusCode = 500,
     message,
   } = err;
-
-  if (err.kind === 'ObjectId') {
-    res.status(400)
-      .send({
-        message: 'Неверно переданы данные',
-      });
-  } else {
-    res
-      .status(statusCode)
-      .send({
-        // проверяем статус и выставляем сообщение в зависимости от него
-        message: statusCode === 500
-          ? 'На сервере произошла ошибка'
-          : message,
-      });
-  }
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+  next();
 });
 
 app.listen(PORT, () => {

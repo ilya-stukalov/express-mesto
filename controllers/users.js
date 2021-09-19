@@ -52,19 +52,28 @@ module.exports.createUser = (req, res, next) => {
       email,
       password: hash,
     }))
-    .then((users) => {
-      res.status(STATUS_OK)
-        .send({ data: users });
+    .then(() => {
+      res
+        .status(STATUS_OK)
+        .send({
+          data: {
+            name,
+            about,
+            avatar,
+            email,
+          },
+        });
     })
     .catch((err) => {
       if (err.name === 'MongoServerError' && err.code === 11000) {
-        throw new UserExistError('Пользователь с таким email существует');
+        next(new UserExistError('Пользователь с таким email существует'));
       }
       if (err.name === 'ValidationError') {
-        throw new InvalidData(err.message);
+        next(new InvalidData(err.message));
+      } else {
+        next(err);
       }
-    })
-    .catch(next);
+    });
 };
 
 module.exports.getUsersById = (req, res, next) => {
@@ -102,8 +111,6 @@ module.exports.updateUserInfo = (req, res, next) => {
 };
 
 module.exports.updateUserAvatar = (req, res, next) => {
-  const token = req.cookies.jwt;
-  console.log(token);
   User.findByIdAndUpdate(req.user._id, { avatar: `${req.body.avatar}` }, {
     new: true,
     runValidators: true,
@@ -123,17 +130,16 @@ module.exports.login = (req, res, next) => {
     email,
     password,
   } = req.body;
-  // TO DO: как импортнуть
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '1h' });
       res
         .cookie('jwt', token, {
-          // token - наш JWT токен, который мы отправляем
           maxAge: 3600000,
           httpOnly: true,
         })
-        .end();
+        .status(STATUS_OK)
+        .send('Авторизация успешна!');
     })
     .catch((err) => {
       throw new NotAuthError(err.message);

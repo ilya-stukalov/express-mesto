@@ -21,33 +21,27 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    // TO DO: есть уже в celebrate
     validate: {
-      validator(v) {
-        return validator.isEmail(v);
-      },
+      validator: (value) => validator.isEmail(value),
       message: (props) => `${props.value} не является email`,
     },
   },
   password: {
     type: String,
     required: true,
-    minlength: 8,
     select: false,
   },
   avatar: {
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     validate: {
-      validator: function (v) {
-        return /^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*$/gm.test(v);
-      },
-      message: (props) => `${props.value} is not a valid link!`,
+      validator: (value) => validator.isURL(value, { protocols: ['http', 'https'], require_tld: true, require_protocol: true }),
+      message: (props) => `${props.value} - URL некорректен`,
     },
   },
 });
 
-userSchema.statics.findUserByCredentials = function (email, password) {
+userSchema.statics.findUserByCredentials = function func(email, password) {
   return this.findOne({ email })
     .select('+password')
     .then((user) => {
